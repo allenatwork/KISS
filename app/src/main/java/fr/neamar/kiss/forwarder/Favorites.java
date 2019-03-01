@@ -41,7 +41,7 @@ public class Favorites extends Forwarder implements View.OnClickListener, View.O
     /**
      * IDs for the favorites buttons
      */
-    private ArrayList<ViewGroup> favoritesViews = new ArrayList<>();
+    private ArrayList<ImageView> favoritesViews = new ArrayList<>();
 
     /**
      * Currently displayed favorites
@@ -114,23 +114,15 @@ public class Favorites extends Forwarder implements View.OnClickListener, View.O
         return bitmap;
     }
 
-    private ViewGroup getFavoriteViewGroup(int idx) {
+    private ImageView getFavoriteImageView(int idx) {
         while (favoritesViews.size() <= idx) {
             View view = LayoutInflater.from(mainActivity).inflate(R.layout.favorite_item, (ViewGroup) mainActivity.favoritesBar, false);
             ((ViewGroup) mainActivity.favoritesBar).addView(view);
-            favoritesViews.add((ViewGroup) view);
+            favoritesViews.add((ImageView) view);
             view.setOnDragListener(this);
             view.setOnTouchListener(this);
         }
         return favoritesViews.get(idx);
-    }
-
-    private ImageView getFavoriteImageView(int idx) {
-        return (ImageView) getFavoriteViewGroup(idx).findViewById(android.R.id.icon);
-    }
-
-    private TextView getFavoriteTextView(int idx) {
-        return (TextView) getFavoriteViewGroup(idx).findViewById(android.R.id.text1);
     }
 
     void onFavoriteChange() {
@@ -145,16 +137,6 @@ public class Favorites extends Forwarder implements View.OnClickListener, View.O
 
             Result result = Result.fromPojo(mainActivity, pojo);
             Drawable drawable = result.getDrawable(mainActivity);
-            TextView text = getFavoriteTextView(i);
-            if (result instanceof TagDummyResult)
-            {
-                text.setVisibility(View.VISIBLE);
-                text.setText(pojo.getName());
-            }
-            else
-            {
-                text.setVisibility(View.GONE);
-            }
             ImageView image = getFavoriteImageView(i);
             if (drawable != null) {
                 if (result instanceof ContactsResult) {
