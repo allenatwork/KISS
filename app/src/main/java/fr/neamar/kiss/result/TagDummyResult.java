@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -30,13 +32,14 @@ public class TagDummyResult extends Result {
     public Drawable getDrawable(Context context) {
         if (mDrawable != null)
             return mDrawable;
+
         Drawable drawable;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             drawable = context.getDrawable(R.drawable.ic_launcher_white);
         else
             drawable = context.getResources().getDrawable(R.drawable.ic_launcher_white);
 
-        // create a canvas from a bitmap
+        // the drawable should be the same size as the launcher icon
         int width = 10;
         int height = 10;
         if (drawable != null) {
@@ -45,10 +48,12 @@ public class TagDummyResult extends Result {
             width = intrinsicWidth >= 0 ? intrinsicWidth : width;
             height = intrinsicHeight >= 0 ? intrinsicHeight : height;
         }
+
+        // create a canvas from a bitmap
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
 
-        // StaticLayout
+        // use StaticLayout to draw the text centered
         TextPaint paint = new TextPaint();
         paint.setFlags(Paint.ANTI_ALIAS_FLAG);
         paint.setTextSize(.6f * height);
@@ -62,13 +67,16 @@ public class TagDummyResult extends Result {
             staticLayout = new StaticLayout(pojo.getName(), 0, 1, paint, canvas.getWidth(), Layout.Alignment.ALIGN_CENTER, 1f, 0f, true);
         }
 
-        // white rounded background
+        // draw a white rounded background
         paint.setColor(0xFFffffff);
         canvas.drawRoundRect(new RectF(0, 0, width, height), width / 2.4f, height / 2.4f, paint);
 
-        paint.setColor(0xFF000000);
+        // write text with "transparent" (create a hole in the background)
+        paint.setColor(0);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         staticLayout.draw(canvas);
 
+        // keep a reference to the drawable in case we need it again
         mDrawable = new BitmapDrawable(bitmap);
         return mDrawable;
     }
