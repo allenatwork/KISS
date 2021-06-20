@@ -53,14 +53,9 @@ class InterfaceTweaks extends Forwarder {
     void onCreate() {
         UIColors.updateThemePrimaryColor(mainActivity);
         applyRoundedCorners(mainActivity);
-        swapKissButtonWithMenu(mainActivity);
-        tintResources(mainActivity);
 
         // Transparent Search and Favorites bar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            if (prefs.getBoolean("transparent-favorites", true) && isExternalFavoriteBarEnabled()) {
-                mainActivity.favoritesBar.setBackgroundResource(android.R.color.transparent);
-            }
             if (prefs.getBoolean("transparent-search", false)) {
                 mainActivity.findViewById(R.id.searchEditLayout).setBackgroundResource(android.R.color.transparent);
                 mainActivity.searchEditText.setBackgroundResource(android.R.color.transparent);
@@ -102,20 +97,11 @@ class InterfaceTweaks extends Forwarder {
         }
 
         mainActivity.findViewById(R.id.searchEditLayout).getLayoutParams().height = searchHeight;
-        mainActivity.kissBar.getLayoutParams().height = searchHeight;
-        mainActivity.findViewById(R.id.embeddedFavoritesBar).getLayoutParams().height = searchHeight;
-
-        // Large favorite bar
-        if (prefs.getBoolean("large-favorites-bar", false) && isExternalFavoriteBarEnabled()) {
-            mainActivity.favoritesBar.getLayoutParams().height = res.getDimensionPixelSize(R.dimen.large_favorite_height);
-        }
     }
 
     private void applyRoundedCorners(MainActivity mainActivity) {
         if (prefs.getBoolean("pref-rounded-bars", true)) {
-            mainActivity.kissBar.setBackgroundResource(R.drawable.rounded_kiss_bar);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mainActivity.findViewById(R.id.externalFavoriteBar).setBackgroundResource(R.drawable.rounded_search_bar);
                 mainActivity.findViewById(R.id.searchEditLayout).setBackgroundResource(R.drawable.rounded_search_bar);
             } else {
                 // Before API21, you can't access values from current theme using ?attr/
@@ -123,25 +109,19 @@ class InterfaceTweaks extends Forwarder {
                 Resources res = mainActivity.getResources();
 
                 if (getSearchBackgroundColor() == Color.WHITE) {
-                    mainActivity.findViewById(R.id.externalFavoriteBar).setBackgroundResource(R.drawable.rounded_search_bar_pre21_light);
                     mainActivity.findViewById(R.id.searchEditLayout).setBackgroundResource(R.drawable.rounded_search_bar_pre21_light);
                 } else if (getSearchBackgroundColor() == res.getColor(R.color.kiss_background_light_transparent)) {
-                    mainActivity.findViewById(R.id.externalFavoriteBar).setBackgroundResource(R.drawable.rounded_search_bar_pre21_semi_trans_light);
                     mainActivity.findViewById(R.id.searchEditLayout).setBackgroundResource(R.drawable.rounded_search_bar_pre21_semi_trans_light);
                 } else if (getSearchBackgroundColor() == res.getColor(R.color.kiss_background_dark_transparent)) {
-                    mainActivity.findViewById(R.id.externalFavoriteBar).setBackgroundResource(R.drawable.rounded_search_bar_pre21_semi_trans_dark);
                     mainActivity.findViewById(R.id.searchEditLayout).setBackgroundResource(R.drawable.rounded_search_bar_pre21_semi_trans_dark);
                 } else if (getSearchBackgroundColor() == Color.BLACK) {
-                    mainActivity.findViewById(R.id.externalFavoriteBar).setBackgroundResource(R.drawable.rounded_search_bar_pre21_amoled);
                     mainActivity.findViewById(R.id.searchEditLayout).setBackgroundResource(R.drawable.rounded_search_bar_pre21_amoled);
                 } else {
-                    mainActivity.findViewById(R.id.externalFavoriteBar).setBackgroundResource(R.drawable.rounded_search_bar_pre21_dark);
                     mainActivity.findViewById(R.id.searchEditLayout).setBackgroundResource(R.drawable.rounded_search_bar_pre21_dark);
                 }
             }
         } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             // Tinting is not properly applied pre lollipop if there is no solid background, so we need to manually set the background color
-            mainActivity.kissBar.setBackgroundColor(UIColors.getPrimaryColor(mainActivity));
         }
 
         if (prefs.getBoolean("pref-rounded-list", false)) {
@@ -166,53 +146,6 @@ class InterfaceTweaks extends Forwarder {
                     mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_dark);
             }
         }
-    }
-
-    private void swapKissButtonWithMenu(MainActivity mainActivity) {
-        if (prefs.getBoolean("pref-swap-kiss-button-with-menu", false)) {
-            // swap the content from the left and right button wrappers
-            List<View> leftHandSideViews = ViewGroupUtils.removeAndGetDirectChildren(mainActivity.rightHandSideButtonsWrapper);
-            List<View> rightHandSideViews = ViewGroupUtils.removeAndGetDirectChildren(mainActivity.leftHandSideButtonsWrapper);
-            ViewGroupUtils.addAllViews(mainActivity.rightHandSideButtonsWrapper, rightHandSideViews);
-            ViewGroupUtils.addAllViews(mainActivity.leftHandSideButtonsWrapper, leftHandSideViews);
-            // align whiteLauncherButton to the right
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mainActivity.whiteLauncherButton.getLayoutParams();
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 1);
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_END, 1);
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_START, 0);
-            }
-            // align embeddedFavoritesBar to the left of whiteLauncherButton
-            layoutParams = (RelativeLayout.LayoutParams) mainActivity.findViewById(R.id.embeddedFavoritesBar).getLayoutParams();
-            layoutParams.addRule(RelativeLayout.RIGHT_OF, 0);
-            layoutParams.addRule(RelativeLayout.LEFT_OF, mainActivity.whiteLauncherButton.getId());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                layoutParams.addRule(RelativeLayout.END_OF, 0);
-                layoutParams.addRule(RelativeLayout.START_OF, mainActivity.whiteLauncherButton.getId());
-            }
-        }
-    }
-
-    private void tintResources(MainActivity mainActivity) {
-        int primaryColorOverride = UIColors.getPrimaryColor(mainActivity);
-
-        // Circuit breaker, keep default behavior.
-        if (primaryColorOverride == UIColors.COLOR_DEFAULT) {
-            return;
-        }
-
-        // Launcher button should have the main color
-        ImageView launcherButton = mainActivity.findViewById(R.id.launcherButton);
-        launcherButton.setColorFilter(primaryColorOverride);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            ProgressBar loaderBar = mainActivity.findViewById(R.id.loaderBar);
-            loaderBar.getIndeterminateDrawable().setColorFilter(primaryColorOverride, PorterDuff.Mode.SRC_IN);
-        }
-
-        // Kissbar background
-        mainActivity.kissBar.getBackground().mutate().setColorFilter(primaryColorOverride, PorterDuff.Mode.SRC_IN);
     }
 
     private int getSearchBackgroundColor() {

@@ -34,7 +34,7 @@ class Notification extends Forwarder {
             // Also, it means we get to display an animation, and that's cool :D
 
             updateDots(list, list.getLastVisiblePosition() - list.getFirstVisiblePosition() + 1, packageKey);
-            updateDots(mainActivity.favoritesBar, mainActivity.favoritesBar.getChildCount(), packageKey);
+//            updateDots(mainActivity.favoritesBar, mainActivity.favoritesBar.getChildCount(), packageKey);
 
         }
     };

@@ -82,7 +82,6 @@ public abstract class Searcher extends AsyncTask<Void, Result, Void> {
         if (activity == null)
             return;
 
-        activity.displayLoader(true);
     }
 
     @Override
@@ -92,7 +91,6 @@ public abstract class Searcher extends AsyncTask<Void, Result, Void> {
             return;
 
         // Loader should still be displayed until all the providers have finished loading
-        activity.displayLoader(!KissApplication.getApplication(activity).getDataHandler().allProvidersHaveLoaded);
 
         if (this.processedPojos.isEmpty()) {
             activity.adapter.clear();

@@ -50,7 +50,6 @@ class ExperienceTweaks extends Forwarder {
 
     private final Runnable displayKeyboardRunnable = mainActivity::showKeyboard;
 
-    private View mainEmptyView;
     private final GestureDetector gd;
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -173,9 +172,6 @@ class ExperienceTweaks extends Forwarder {
                         mainActivity.hideKeyboard();
                         break;
                     case "display-apps":
-                        if (mainActivity.isViewingSearchResults()) {
-                            mainActivity.displayKissBar(true);
-                        }
                         break;
                     case "display-history":
                         // if minimalistic mode is enabled,
@@ -191,14 +187,11 @@ class ExperienceTweaks extends Forwarder {
                             }
                         }
 
-                        if (isMinimalisticModeEnabledForFavorites()) {
-                            mainActivity.favoritesBar.setVisibility(View.VISIBLE);
-                        }
                         break;
                     case "display-favorites":
                         // Not provided as an option for the gestures, but useful if you only want to display favorites on tap,
                         // not history.
-                        mainActivity.favoritesBar.setVisibility(View.VISIBLE);
+//                        mainActivity.favoritesBar.setVisibility(View.VISIBLE);
                         break;
                     case "display-menu":
                         mainActivity.openContextMenu(mainActivity.menuButton);
@@ -209,7 +202,6 @@ class ExperienceTweaks extends Forwarder {
     }
 
     void onCreate() {
-        mainEmptyView = mainActivity.findViewById(R.id.main_empty);
     }
 
     void onResume() {
@@ -235,13 +227,10 @@ class ExperienceTweaks extends Forwarder {
         }
 
         if (isMinimalisticModeEnabled()) {
-            mainEmptyView.setVisibility(View.GONE);
-
             mainActivity.list.setVerticalScrollBarEnabled(false);
             mainActivity.searchEditText.setHint("");
         }
         if (prefs.getBoolean("pref-hide-circle", false)) {
-            ((ImageView) mainActivity.launcherButton).setImageBitmap(null);
             ((ImageView) mainActivity.menuButton).setImageBitmap(null);
         }
     }
@@ -255,9 +244,9 @@ class ExperienceTweaks extends Forwarder {
     }
 
     void onDisplayKissBar(boolean display) {
-        if (isMinimalisticModeEnabledForFavorites() && !display) {
-            mainActivity.favoritesBar.setVisibility(View.GONE);
-        }
+//        if (isMinimalisticModeEnabledForFavorites() && !display) {
+//            mainActivity.favoritesBar.setVisibility(View.GONE);
+//        }
     }
 
     void updateSearchRecords(boolean isRefresh, String query) {
@@ -265,11 +254,10 @@ class ExperienceTweaks extends Forwarder {
             if (isMinimalisticModeEnabled()) {
                 mainActivity.runTask(new NullSearcher(mainActivity));
                 // By default, help text is displayed -- not in minimalistic mode.
-                mainEmptyView.setVisibility(View.GONE);
 
-                if (isMinimalisticModeEnabledForFavorites()) {
-                    mainActivity.favoritesBar.setVisibility(View.GONE);
-                }
+//                if (isMinimalisticModeEnabledForFavorites()) {
+//                    mainActivity.favoritesBar.setVisibility(View.GONE);
+//                }
             } else {
                 Searcher searcher = new HistorySearcher(mainActivity);
                 searcher.setRefresh(isRefresh);

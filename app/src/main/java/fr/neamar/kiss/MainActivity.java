@@ -96,10 +96,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
     public AnimatedListView list;
     public View listContainer;
     /**
-     * View to display when list is empty
-     */
-    public View emptyListView;
-    /**
      * Utility for automatically hiding the keyboard when scrolling down
      */
     private KeyboardScrollHider hider;
@@ -112,33 +108,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
      * Menu button
      */
     public View menuButton;
-    /**
-     * Kiss bar
-     */
-    public View kissBar;
-    /**
-     * Favorites bar. Can be either the favorites within the KISS bar,
-     * or the external favorites bar (default)
-     */
-    public ViewGroup favoritesBar;
-    /**
-     * Progress bar displayed when loading
-     */
-    private View loaderSpinner;
-
-    /**
-     * The ViewGroup that wraps the buttons at the left hand side of the searchEditText
-     */
-    public ViewGroup leftHandSideButtonsWrapper;
-    /**
-     * Launcher button, can be clicked to display all apps
-     */
-    public View launcherButton;
-
-    /**
-     * Launcher button's white counterpart, which appears when launcher button is clicked
-     */
-    public View whiteLauncherButton;
     /**
      * "X" button to empty the search field
      */
@@ -201,9 +170,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
                     updateSearchRecords(true);
                 } else if (intent.getAction().equalsIgnoreCase(FULL_LOAD_OVER)) {
                     Log.v(TAG, "All providers are done loading.");
-
-                    displayLoader(false);
-
                     // Run GC once to free all the garbage accumulated during provider initialization
                     System.gc();
                 }
@@ -223,28 +189,14 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
         setContentView(R.layout.main);
         this.list = this.findViewById(android.R.id.list);
         this.listContainer = (View) this.list.getParent();
-        this.emptyListView = this.findViewById(android.R.id.empty);
-        this.kissBar = findViewById(R.id.mainKissbar);
         this.rightHandSideButtonsWrapper = findViewById(R.id.rightHandSideButtonsWrapper);
         this.menuButton = findViewById(R.id.menuButton);
         this.searchEditText = findViewById(R.id.searchEditText);
-        this.loaderSpinner = findViewById(R.id.loaderBar);
-        this.leftHandSideButtonsWrapper = findViewById(R.id.leftHandSideButtonsWrapper);
-        this.launcherButton = findViewById(R.id.launcherButton);
-        this.whiteLauncherButton = findViewById(R.id.whiteLauncherButton);
         this.clearButton = findViewById(R.id.clearButton);
 
-        /*
-         * Initialize components behavior
-         * Note that a lot of behaviors are also initialized through the forwarderManager.onCreate() call.
-         */
-        displayLoader(true);
 
         // Add touch listener for history popup to root view
         findViewById(android.R.id.content).setOnTouchListener(this);
-
-        // add history popup touch listener to empty view (prevents it from not working there)
-        this.emptyListView.setOnTouchListener(this);
 
         // Create adapter for records
         this.adapter = new RecordAdapter(this, new ArrayList<>());
@@ -269,11 +221,9 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
                 if (adapter.isEmpty()) {
                     // Display help text when no results available
                     listContainer.setVisibility(View.GONE);
-                    emptyListView.setVisibility(View.VISIBLE);
                 } else {
                     // Otherwise, display results
                     listContainer.setVisibility(View.VISIBLE);
-                    emptyListView.setVisibility(View.GONE);
                 }
 
                 forwarderManager.onDataSetChanged();
@@ -293,9 +243,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (isViewingAllApps()) {
-                    displayKissBar(false, false);
-                }
                 String text = s.toString();
                 updateSearchRecords(false, text);
                 displayClearOnInput();
@@ -403,7 +350,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
         dismissPopup();
 
         if (KissApplication.getApplication(this).getDataHandler().allProvidersHaveLoaded) {
-            displayLoader(false);
             onFavoriteChange();
         }
 
@@ -411,10 +357,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
         // (for instance, installed a new app, got a phone call or simply clicked on a favorite)
         updateSearchRecords(true);
         displayClearOnInput();
-
-        if (isViewingAllApps()) {
-            displayKissBar(false);
-        }
 
         forwarderManager.onResume();
 
@@ -456,11 +398,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
             searchEditText.setText("");
         }
 
-        // Hide kissbar when coming back to kiss
-        if (isViewingAllApps()) {
-            displayKissBar(false);
-        }
-
         // Close the backButton context menu
         closeContextMenu();
     }
@@ -469,8 +406,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
     public void onBackPressed() {
         if (mPopup != null) {
             mPopup.dismiss();
-        } else if (isViewingAllApps()) {
-            displayKissBar(false);
         } else {
             // If no kissmenu, empty the search bar
             // (this will trigger a new event if the search bar was already empty)
@@ -579,14 +514,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
         searchEditText.setText("");
     }
 
-    /**
-     * Display KISS menu
-     */
-    public void onLauncherButtonClicked(View launcherButton) {
-        // Display or hide the kiss bar, according to current view tag (showMenu / hideMenu).
-        displayKissBar(launcherButton.getTag().equals("showMenu"));
-    }
-
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (mPopup != null && ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -606,117 +533,8 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
         }
     }
 
-    public void displayLoader(Boolean display) {
-        int animationDuration = getResources().getInteger(
-                android.R.integer.config_longAnimTime);
-
-        // Do not display animation if launcher button is already visible
-        if (!display && launcherButton.getVisibility() == View.INVISIBLE) {
-            launcherButton.setVisibility(View.VISIBLE);
-
-            // Animate transition from loader to launch button
-            launcherButton.setAlpha(0);
-            launcherButton.animate()
-                    .alpha(1f)
-                    .setDuration(animationDuration)
-                    .setListener(null);
-            loaderSpinner.animate()
-                    .alpha(0f)
-                    .setDuration(animationDuration)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            loaderSpinner.setVisibility(View.GONE);
-                            loaderSpinner.setAlpha(1);
-                        }
-                    });
-        } else if (display) {
-            launcherButton.setVisibility(View.INVISIBLE);
-            loaderSpinner.setVisibility(View.VISIBLE);
-        }
-    }
-
     public void onFavoriteChange() {
         forwarderManager.onFavoriteChange();
-    }
-
-    public void displayKissBar(Boolean display) {
-        this.displayKissBar(display, true);
-    }
-
-    private void displayKissBar(boolean display, boolean clearSearchText) {
-        dismissPopup();
-        // get the center for the clipping circle
-        ViewGroup launcherButtonWrapper = (ViewGroup) launcherButton.getParent();
-        int cx = (launcherButtonWrapper.getLeft() + launcherButtonWrapper.getRight()) / 2;
-        int cy = (launcherButtonWrapper.getTop() + launcherButtonWrapper.getBottom()) / 2;
-
-        // get the final radius for the clipping circle
-        int finalRadius = Math.max(kissBar.getWidth(), kissBar.getHeight());
-
-        if (display) {
-            // Display the app list
-            if (searchEditText.getText().length() != 0) {
-                searchEditText.setText("");
-            }
-            resetTask();
-
-            // Needs to be done after setting the text content to empty
-            isDisplayingKissBar = true;
-
-            searchTask = new ApplicationsSearcher(MainActivity.this);
-            searchTask.executeOnExecutor(Searcher.SEARCH_THREAD);
-
-            // Reveal the bar
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                int animationDuration = getResources().getInteger(
-                        android.R.integer.config_shortAnimTime);
-
-                Animator anim = ViewAnimationUtils.createCircularReveal(kissBar, cx, cy, 0, finalRadius);
-                anim.setDuration(animationDuration);
-                anim.start();
-            }
-            kissBar.setVisibility(View.VISIBLE);
-
-            // Display the alphabet on the scrollbar (#926)
-            list.setFastScrollEnabled(true);
-        } else {
-            isDisplayingKissBar = false;
-            // Hide the bar
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                int animationDuration = getResources().getInteger(
-                        android.R.integer.config_shortAnimTime);
-
-                try {
-                    Animator anim = ViewAnimationUtils.createCircularReveal(kissBar, cx, cy, finalRadius, 0);
-                    anim.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            kissBar.setVisibility(View.GONE);
-                            super.onAnimationEnd(animation);
-                        }
-                    });
-                    anim.setDuration(animationDuration);
-                    anim.start();
-                } catch (IllegalStateException e) {
-                    // If the view hasn't been laid out yet, we can't animate it
-                    kissBar.setVisibility(View.GONE);
-                }
-            } else {
-                // No animation before Lollipop
-                kissBar.setVisibility(View.GONE);
-            }
-
-            if (clearSearchText) {
-                searchEditText.setText("");
-            }
-
-            // Do not display the alphabetical scrollbar (#926)
-            // They only make sense when displaying apps alphabetically, not for searching
-            list.setFastScrollEnabled(false);
-        }
-
-        forwarderManager.onDisplayKissBar(display);
     }
 
     public void updateSearchRecords(boolean isRefresh) {
@@ -732,7 +550,7 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
      * @param query     the query on which to search
      */
     private void updateSearchRecords(boolean isRefresh, String query) {
-        if (isRefresh && isViewingAllApps()) {
+        if (isRefresh) {
             // Refreshing while viewing all apps (for instance app installed or uninstalled in the background)
             Searcher searcher = new ApplicationsSearcher(this);
             searcher.setRefresh(isRefresh);
@@ -820,8 +638,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
             searchEditText.setText("");
             displayClearOnInput();
             hideKeyboard();
-        } else if (isViewingAllApps()) {
-            displayKissBar(false);
         }
     }
 
@@ -900,10 +716,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
      */
     public boolean isViewingSearchResults() {
         return !isDisplayingKissBar;
-    }
-
-    public boolean isViewingAllApps() {
-        return isDisplayingKissBar;
     }
 
     public void beforeListChange() {

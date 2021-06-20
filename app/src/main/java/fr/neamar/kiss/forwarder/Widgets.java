@@ -106,7 +106,6 @@ class Widgets extends Forwarder {
     void onDataSetChanged() {
         if (widgetArea.getChildCount() > 0 && mainActivity.adapter.isEmpty()) {
             // when a widget is displayed the empty list would prevent touches on the widget
-            mainActivity.emptyListView.setVisibility(View.GONE);
         }
     }
 
@@ -134,7 +133,6 @@ class Widgets extends Forwarder {
         }
 
         // remove empty list view when using widgets, this would block touches on the widget
-        mainActivity.emptyListView.setVisibility(View.GONE);
         widgetArea.removeAllViews();
         String widgetsConfString = prefs.getString(WIDGET_PREF_KEY, "");
         String[] widgetsConf = widgetsConfString.split(";");

@@ -13,7 +13,7 @@ public class ForwarderManager extends Forwarder {
     private final LiveWallpaper liveWallpaperForwarder;
     private final InterfaceTweaks interfaceTweaks;
     private final ExperienceTweaks experienceTweaks;
-    private final Favorites favoritesForwarder;
+//    private final Favorites favoritesForwarder;
     private final OreoShortcuts shortcutsForwarder;
     private final TagsMenu tagsMenu;
     private final Notification notificationForwarder;
@@ -26,14 +26,14 @@ public class ForwarderManager extends Forwarder {
         this.interfaceTweaks = new InterfaceTweaks(mainActivity);
         this.liveWallpaperForwarder = new LiveWallpaper(mainActivity);
         this.experienceTweaks = new ExperienceTweaks(mainActivity);
-        this.favoritesForwarder = new Favorites(mainActivity);
+//        this.favoritesForwarder = new Favorites(mainActivity);
         this.shortcutsForwarder = new OreoShortcuts(mainActivity);
         this.notificationForwarder = new Notification(mainActivity);
         this.tagsMenu = new TagsMenu(mainActivity);
     }
 
     public void onCreate() {
-        favoritesForwarder.onCreate();
+//        favoritesForwarder.onCreate();
         widgetsForwarder.onCreate();
         interfaceTweaks.onCreate();
         experienceTweaks.onCreate();
@@ -82,16 +82,16 @@ public class ForwarderManager extends Forwarder {
 
     public void onDataSetChanged() {
         widgetsForwarder.onDataSetChanged();
-        favoritesForwarder.onDataSetChanged();
+//        favoritesForwarder.onDataSetChanged();
     }
 
     public void updateSearchRecords(boolean isRefresh, String query) {
-        favoritesForwarder.updateSearchRecords(query);
+//        favoritesForwarder.updateSearchRecords(query);
         experienceTweaks.updateSearchRecords(isRefresh, query);
     }
 
     public void onFavoriteChange() {
-        favoritesForwarder.onFavoriteChange();
+//        favoritesForwarder.onFavoriteChange();
     }
 
     public void onDisplayKissBar(boolean display) {
