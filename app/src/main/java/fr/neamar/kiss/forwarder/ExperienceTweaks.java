@@ -179,7 +179,7 @@ class ExperienceTweaks extends Forwarder {
                             // and we're currently in minimalistic mode with no results,
                             // and we're not looking at the app list
                             if (mainActivity.isViewingSearchResults() && mainActivity.searchEditText.getText().toString().isEmpty()) {
-                                if (mainActivity.list.getAdapter() == null || mainActivity.list.getAdapter().isEmpty()) {
+                                if (mainActivity.list.getAdapter() == null) {
                                     mainActivity.runTask(new HistorySearcher(mainActivity));
                                     mainActivity.clearButton.setVisibility(View.VISIBLE);
                                     mainActivity.menuButton.setVisibility(View.INVISIBLE);

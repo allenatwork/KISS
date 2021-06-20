@@ -30,10 +30,7 @@ public class SettingsResult extends Result {
 
     @NonNull
     @Override
-    public View display(Context context, View view, @NonNull ViewGroup parent, FuzzyScore fuzzyScore) {
-        if (view == null)
-            view = inflateFromId(context, R.layout.item_setting, parent);
-
+    public View display(Context context, View view, FuzzyScore fuzzyScore) {
         TextView settingName = view.findViewById(R.id.item_setting_name);
         displayHighlighted(settingPojo.normalizedName, settingPojo.getName(), fuzzyScore, settingName, context);
 

@@ -32,10 +32,7 @@ public class PhoneResult extends CallResult {
 
     @NonNull
     @Override
-    public View display(Context context, View view, @NonNull ViewGroup parent, FuzzyScore fuzzyScore) {
-        if (view == null)
-            view = inflateFromId(context, R.layout.item_phone, parent);
-
+    public View display(Context context, View view, FuzzyScore fuzzyScore) {
         TextView phoneText = view.findViewById(R.id.item_phone_text);
         String text = String.format(context.getString(R.string.ui_item_phone), phonePojo.phone);
         int pos = text.indexOf(phonePojo.phone);

@@ -38,12 +38,17 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 import fr.neamar.kiss.adapter.RecordAdapter;
 import fr.neamar.kiss.broadcast.IncomingCallHandler;
 import fr.neamar.kiss.forwarder.ForwarderManager;
+import fr.neamar.kiss.pojo.Pojo;
+import fr.neamar.kiss.result.Result;
 import fr.neamar.kiss.searcher.ApplicationsSearcher;
 import fr.neamar.kiss.searcher.HistorySearcher;
 import fr.neamar.kiss.searcher.QueryInterface;
@@ -93,8 +98,7 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
     /**
      * Main list view
      */
-    public AnimatedListView list;
-    public View listContainer;
+    public RecyclerView list;
     /**
      * Utility for automatically hiding the keyboard when scrolling down
      */
@@ -188,7 +192,6 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
          */
         setContentView(R.layout.main);
         this.list = this.findViewById(android.R.id.list);
-        this.listContainer = (View) this.list.getParent();
         this.rightHandSideButtonsWrapper = findViewById(R.id.rightHandSideButtonsWrapper);
         this.menuButton = findViewById(R.id.menuButton);
         this.searchEditText = findViewById(R.id.searchEditText);
@@ -200,36 +203,37 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
 
         // Create adapter for records
         this.adapter = new RecordAdapter(this, new ArrayList<>());
+        this.list.setLayoutManager(new LinearLayoutManager(this));
         this.list.setAdapter(this.adapter);
 
-        this.list.setOnItemClickListener((parent, v, position, id) -> adapter.onClick(position, v));
-
-        this.list.setLongClickable(true);
-        this.list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View v, int pos, long id) {
-                ((RecordAdapter) parent.getAdapter()).onLongClick(pos, v);
-                return true;
-            }
-        });
+//        this.list.setOnItemClickListener((parent, v, position, id) -> adapter.onClick(position, v));
+//
+//        this.list.setLongClickable(true);
+//        this.list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//            @Override
+//            public boolean onItemLongClick(AdapterView<?> parent, View v, int pos, long id) {
+//                ((RecordAdapter) parent.getAdapter()).onLongClick(pos, v);
+//                return true;
+//            }
+//        });
 
         // Display empty list view when having no results
-        this.adapter.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                if (adapter.isEmpty()) {
-                    // Display help text when no results available
-                    listContainer.setVisibility(View.GONE);
-                } else {
-                    // Otherwise, display results
-                    listContainer.setVisibility(View.VISIBLE);
-                }
-
-                forwarderManager.onDataSetChanged();
-
-            }
-        });
+//        this.adapter.registerDataSetObserver(new DataSetObserver() {
+//            @Override
+//                super.onChanged();
+//            public void onChanged() {
+//                if (adapter.isEmpty()) {
+//                    // Display help text when no results available
+//                    listContainer.setVisibility(View.GONE);
+//                } else {
+//                    // Otherwise, display results
+//                    listContainer.setVisibility(View.VISIBLE);
+//                }
+//
+//                forwarderManager.onDataSetChanged();
+//
+//            }
+//        });
 
         // Listen to changes
         searchEditText.addTextChangedListener(new TextWatcher() {
@@ -275,21 +279,14 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
                     hider.fixScroll();
                     return false;
                 }
-                adapter.onClick(adapter.getCount() - 1, v);
+                //Todo: onclick first item
+//                adapter.onClick(adapter.getCount() - 1, v);
 
                 return true;
             }
         });
 
         registerForContextMenu(menuButton);
-
-        // When scrolling down on the list,
-        // Hide the keyboard.
-        this.hider = new KeyboardScrollHider(this,
-                this.list,
-                (BottomPullEffectView) this.findViewById(R.id.listEdgeEffect)
-        );
-        this.hider.start();
 
         // Enable/disable phone broadcast receiver
         PackageManagerUtils.enableComponent(this, IncomingCallHandler.class, prefs.getBoolean("enable-phone-history", false));
@@ -607,9 +604,9 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
      */
     @Override
     public void temporarilyDisableTranscriptMode() {
-        list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
-        // Add a message to be processed after all current messages, to reset transcript mode to default
-        list.post(() -> list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL));
+//        list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
+//        // Add a message to be processed after all current messages, to reset transcript mode to default
+//        list.post(() -> list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL));
     }
 
     /**
@@ -622,7 +619,7 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
      */
     @Override
     public void updateTranscriptMode(int transcriptMode) {
-        list.setTranscriptMode(transcriptMode);
+//        list.setTranscriptMode(transcriptMode);
     }
 
     /**
@@ -658,12 +655,11 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
 
     @Override
     public void showDialog(DialogFragment dialog) {
-        final View resultLayout = findViewById(R.id.resultLayout);
         if (dialog instanceof CustomIconDialog) {
             // We assume the mResultLayout was visible
-            resultLayout.setVisibility(View.GONE);
+            list.setVisibility(View.GONE);
             ((CustomIconDialog) dialog).setOnDismissListener(dlg -> {
-                resultLayout.setVisibility(View.VISIBLE);
+                list.setVisibility(View.VISIBLE);
                 // force icon reload by searching again; is there any better way?
                 updateSearchRecords(true);
             });
@@ -719,11 +715,11 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
     }
 
     public void beforeListChange() {
-        list.prepareChangeAnim();
+//        list.prepareChangeAnim();
     }
 
     public void afterListChange() {
-        list.animateChange();
+//        list.animateChange();
     }
 
     public void dismissPopup() {
@@ -765,5 +761,20 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
         }
 
         return homePackage.equals(this.getPackageName());
+    }
+
+    public void updateResult(PriorityQueue<Pojo> processedPojos, boolean isRefresh, String query) {
+        if (processedPojos.isEmpty()) {
+            adapter.clear();
+        } else {
+            PriorityQueue<Pojo> queue = processedPojos;
+            ArrayList<Result> results = new ArrayList<>(queue.size());
+            while (queue.peek() != null) {
+                results.add(Result.fromPojo(this, queue.poll()));
+            }
+            adapter.updateResults(results, false, query);
+
+        }
+        resetTask();
     }
 }

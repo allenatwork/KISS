@@ -2,12 +2,13 @@ package fr.neamar.kiss.adapter;
 
 import android.app.DialogFragment;
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import fr.neamar.kiss.R;
 import fr.neamar.kiss.normalizer.StringNormalizer;
 import fr.neamar.kiss.result.AppResult;
 import fr.neamar.kiss.result.ContactsResult;
@@ -27,7 +29,7 @@ import fr.neamar.kiss.searcher.QueryInterface;
 import fr.neamar.kiss.ui.ListPopup;
 import fr.neamar.kiss.utils.FuzzyScore;
 
-public class RecordAdapter extends BaseAdapter implements SectionIndexer {
+public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ResultViewHolder> implements SectionIndexer {
     private final QueryInterface parent;
     private FuzzyScore fuzzyScore;
 
@@ -45,12 +47,45 @@ public class RecordAdapter extends BaseAdapter implements SectionIndexer {
         this.parent = parent;
         this.results = results;
         this.fuzzyScore = null;
+        setHasStableIds(true);
+    }
+
+
+    @NonNull
+    @Override
+    public ResultViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = null;
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        switch (viewType) {
+            case 0:
+                view = inflater.inflate(R.layout.item_app, parent,false);
+                break;
+            case 1:
+                view = inflater.inflate(R.layout.item_search, parent,false);
+                break;
+            case 2:
+                view = inflater.inflate(R.layout.item_contact, parent,false);
+                break;
+            case 3:
+                view = inflater.inflate(R.layout.item_setting, parent,false);
+                break;
+            case 4:
+                view = inflater.inflate(R.layout.item_phone, parent,false);
+                break;
+            case 5:
+                view = inflater.inflate(R.layout.item_shortcut, parent,false);
+                break;
+
+        }
+        if (view != null) return new ResultViewHolder(view);
+        return null;
     }
 
     @Override
-    public int getViewTypeCount() {
-        return 6;
+    public void onBindViewHolder(@NonNull ResultViewHolder holder, int position) {
+        holder.bindData(results.get(position),fuzzyScore);
     }
+
 
     @Override
     public int getItemViewType(int position) {
@@ -71,21 +106,6 @@ public class RecordAdapter extends BaseAdapter implements SectionIndexer {
     }
 
     @Override
-    public boolean hasStableIds() {
-        return true;
-    }
-
-    @Override
-    public int getCount() {
-        return results.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return results.get(position);
-    }
-
-    @Override
     public long getItemId(int position) {
         // In some situation, Android tries to display an item that does not exist (e.g. item 24 in a list containing 22 items)
         // See https://github.com/Neamar/KISS/issues/890
@@ -93,9 +113,8 @@ public class RecordAdapter extends BaseAdapter implements SectionIndexer {
     }
 
     @Override
-    public @NonNull
-    View getView(int position, View convertView, @NonNull ViewGroup parent) {
-        return results.get(position).display(parent.getContext(), convertView, parent, fuzzyScore);
+    public int getItemCount() {
+        return results.size();
     }
 
     public void onLongClick(final int pos, View v) {
@@ -153,39 +172,6 @@ public class RecordAdapter extends BaseAdapter implements SectionIndexer {
         notifyDataSetChanged();
     }
 
-    /**
-     * When using fast scroll, generate a mapping to know where a given letter starts in the list
-     * (can only be used with a sorted result set!)
-     */
-    public void buildSections() {
-        alphaIndexer.clear();
-        int size = results.size();
-
-        // Generate the mapping letter => number
-        for (int x = 0; x < size; x++) {
-            String s = results.get(x).getSection();
-
-            // Put the first one
-            if (!alphaIndexer.containsKey(s)) {
-                alphaIndexer.put(s, x);
-            }
-        }
-
-        // Generate section list
-        List<Map.Entry<String, Integer>> entries = new ArrayList<>(alphaIndexer.entrySet());
-        Collections.sort(entries, (o1, o2) -> {
-            if (o2.getValue().equals(o1.getValue())) {
-                return 0;
-            }
-            // We're displaying from A to Z, everything needs to be reversed
-            return o2.getValue() > o1.getValue() ? -1 : 1;
-        });
-        sections = new String[entries.size()];
-        for (int i = 0; i < entries.size(); i++) {
-            sections[i] = entries.get(i).getKey();
-        }
-    }
-
     @Override
     public Object[] getSections() {
         return sections;
@@ -222,5 +208,15 @@ public class RecordAdapter extends BaseAdapter implements SectionIndexer {
 
     public void showDialog(DialogFragment dialog) {
         parent.showDialog(dialog);
+    }
+
+    public static class ResultViewHolder extends RecyclerView.ViewHolder {
+        public ResultViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+
+        public void bindData(Result result, FuzzyScore fuzzyScore) {
+            result.display(itemView.getContext(), itemView, fuzzyScore);
+        }
     }
 }

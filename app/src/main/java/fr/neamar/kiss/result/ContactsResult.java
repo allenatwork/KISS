@@ -48,10 +48,7 @@ public class ContactsResult extends CallResult {
 
     @NonNull
     @Override
-    public View display(Context context, View view, @NonNull ViewGroup parent, FuzzyScore fuzzyScore) {
-        if (view == null)
-            view = inflateFromId(context, R.layout.item_contact, parent);
-
+    public View display(Context context, View view, FuzzyScore fuzzyScore) {
         // Contact name
         TextView contactName = view.findViewById(R.id.item_contact_name);
         displayHighlighted(contactPojo.normalizedName, contactPojo.getName(), fuzzyScore, contactName, context);

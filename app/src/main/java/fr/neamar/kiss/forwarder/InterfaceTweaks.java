@@ -125,26 +125,26 @@ class InterfaceTweaks extends Forwarder {
         }
 
         if (prefs.getBoolean("pref-rounded-list", false)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout);
-                // clip list content to rounded corners
-                mainActivity.listContainer.setClipToOutline(true);
-            } else {
-                // Before API21, you can't access values from current theme using ?attr/
-                // So we made different drawable for each theme (#931).
-                Resources res = mainActivity.getResources();
-
-                if (getSearchBackgroundColor() == Color.WHITE)
-                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_light);
-                else if (getSearchBackgroundColor() == res.getColor(R.color.kiss_background_light_transparent))
-                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_semi_trans_light);
-                else if (getSearchBackgroundColor() == res.getColor(R.color.kiss_background_dark_transparent))
-                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_semi_trans_dark);
-                else if (getSearchBackgroundColor() == Color.BLACK)
-                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_amoled);
-                else
-                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_dark);
-            }
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout);
+//                // clip list content to rounded corners
+////                mainActivity.listContainer.setClipToOutline(true);
+//            } else {
+//                // Before API21, you can't access values from current theme using ?attr/
+//                // So we made different drawable for each theme (#931).
+//                Resources res = mainActivity.getResources();
+//
+//                if (getSearchBackgroundColor() == Color.WHITE)
+//                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_light);
+//                else if (getSearchBackgroundColor() == res.getColor(R.color.kiss_background_light_transparent))
+//                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_semi_trans_light);
+//                else if (getSearchBackgroundColor() == res.getColor(R.color.kiss_background_dark_transparent))
+//                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_semi_trans_dark);
+//                else if (getSearchBackgroundColor() == Color.BLACK)
+//                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_amoled);
+//                else
+//                    mainActivity.findViewById(R.id.resultLayout).setBackgroundResource(R.drawable.rounded_result_layout_pre21_dark);
+//            }
         }
     }
 

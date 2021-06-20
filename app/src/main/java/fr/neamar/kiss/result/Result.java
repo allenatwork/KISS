@@ -92,12 +92,11 @@ public abstract class Result {
      *
      * @param context     android context
      * @param convertView a view to be recycled
-     * @param parent      view that provides a set of LayoutParams values
      * @param fuzzyScore  information for highlighting search result
      * @return a view to display as item
      */
     @NonNull
-    public abstract View display(Context context, View convertView, @NonNull ViewGroup parent, FuzzyScore fuzzyScore);
+    public abstract View display(Context context, View convertView, FuzzyScore fuzzyScore);
 
     @NonNull
     public View inflateFavorite(@NonNull Context context, @NonNull ViewGroup parent) {

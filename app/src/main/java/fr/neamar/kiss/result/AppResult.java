@@ -64,10 +64,7 @@ public class AppResult extends Result {
 
     @NonNull
     @Override
-    public View display(final Context context, View view, @NonNull ViewGroup parent, FuzzyScore fuzzyScore) {
-        if (view == null) {
-            view = inflateFromId(context, R.layout.item_app, parent);
-        }
+    public View display(final Context context, View view, FuzzyScore fuzzyScore) {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 

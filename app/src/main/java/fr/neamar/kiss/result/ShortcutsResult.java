@@ -59,10 +59,7 @@ public class ShortcutsResult extends Result {
     @NonNull
     @Override
     @SuppressWarnings("CatchAndPrintStackTrace")
-    public View display(final Context context, View view, @NonNull ViewGroup parent, FuzzyScore fuzzyScore) {
-        if (view == null)
-            view = inflateFromId(context, R.layout.item_shortcut, parent);
-
+    public View display(final Context context, View view, FuzzyScore fuzzyScore) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         TextView shortcutName = view.findViewById(R.id.item_app_name);

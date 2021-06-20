@@ -89,27 +89,7 @@ public abstract class Searcher extends AsyncTask<Void, Result, Void> {
         MainActivity activity = activityWeakReference.get();
         if (activity == null)
             return;
-
-        // Loader should still be displayed until all the providers have finished loading
-
-        if (this.processedPojos.isEmpty()) {
-            activity.adapter.clear();
-        } else {
-            PriorityQueue<Pojo> queue = this.processedPojos;
-            ArrayList<Result> results = new ArrayList<>(queue.size());
-            while (queue.peek() != null) {
-                results.add(Result.fromPojo(activity, queue.poll()));
-            }
-
-            activity.beforeListChange();
-
-            activity.adapter.updateResults(results, isRefresh, query);
-
-            activity.afterListChange();
-        }
-
-        activity.resetTask();
-
+        activity.updateResult (this.processedPojos, isRefresh, query);
         long time = System.currentTimeMillis() - start;
         Log.v("Timing", "Time to run query `" + query + "` on " + getClass().getSimpleName() + " to completion: " + time + "ms");
     }

@@ -104,7 +104,7 @@ class Widgets extends Forwarder {
     }
 
     void onDataSetChanged() {
-        if (widgetArea.getChildCount() > 0 && mainActivity.adapter.isEmpty()) {
+        if (widgetArea.getChildCount() > 0) {
             // when a widget is displayed the empty list would prevent touches on the widget
         }
     }

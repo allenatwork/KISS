@@ -135,10 +135,7 @@ public class TagDummyResult extends Result {
 
     @NonNull
     @Override
-    public View display(Context context, View view, @NonNull ViewGroup parent, FuzzyScore fuzzyScore) {
-        if (view == null)
-            view = inflateFromId(context, R.layout.item_search, parent);
-
+    public View display(Context context, View view, FuzzyScore fuzzyScore) {
         ImageView image = view.findViewById(R.id.item_search_icon);
         TextView searchText = view.findViewById(R.id.item_search_text);
 

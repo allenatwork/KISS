@@ -22,7 +22,7 @@ class Notification extends Forwarder {
     private SharedPreferences.OnSharedPreferenceChangeListener onNotificationDisplayed = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String packageKey) {
-            ListView list = mainActivity.list;
+//            ListView list = mainActivity.list;
 
             // A new notification was received, iterate over the currently displayed results
             // if one of them is for the package that just received a notification,
@@ -33,7 +33,7 @@ class Notification extends Forwarder {
             // and do not rebuild them all, just toggle visibility if required.
             // Also, it means we get to display an animation, and that's cool :D
 
-            updateDots(list, list.getLastVisiblePosition() - list.getFirstVisiblePosition() + 1, packageKey);
+//            updateDots(list, list.getLastVisiblePosition() - list.getFirstVisiblePosition() + 1, packageKey);
 //            updateDots(mainActivity.favoritesBar, mainActivity.favoritesBar.getChildCount(), packageKey);
 
         }
